@@ -2,8 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>巴比美語補習班 | 櫃檯行政校務大腦暨收據系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>巴比美語補習班 | 專屬學員報名系統</title>
     <style>
         :root {
             --uci-blue: #1b3d6d;
@@ -29,10 +29,23 @@
             margin: 0 auto;
             background: #fff;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
         }
 
         .page {
             padding: 30px 40px;
+        }
+
+        .dynamic-top-banner {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--uci-blue);
+            background-color: #e6f0fa;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--uci-gold);
+            display: inline-block;
         }
 
         .header-section {
@@ -579,7 +592,7 @@
                     </tr>
                     <tr>
                         <th><span class="zh-title">經辦人員</span><span class="en-title">Staff Name</span></th>
-                        <td><input type="text" name="staff_name" class="text-input" value=""></td>
+                        <td><input type="text" name="staff_name" class="text-input" value="Joy"></td>
                         <th><span class="zh-title">收據編號</span><span class="en-title">Receipt No.</span></th>
                         <td><input type="text" name="receipt_no" class="text-input" placeholder="R-2026-XXXX"></td>
                         <th><span class="zh-title">教材發放狀況</span><span class="en-title">Material Status</span></th>
@@ -639,18 +652,18 @@
                     </div>
                     <div class="signature-row">
                         <span>日期 Date</span>
-                        <input type="date" name="parent_sig_date" class="signature-input" required>
+                        <input type="date" name="parent_sig_date" id="parentSigDate" class="signature-input" required>
                     </div>
                 </div>
 
                 <div class="signature-box">
                     <div class="signature-row">
                         <span>承辦老師簽章<br>(Staff Signature)</span>
-                        <input type="text" name="teacher_signature" class="signature-input">
+                        <input type="text" name="teacher_signature" class="signature-input" value="Joy">
                     </div>
                     <div class="signature-row">
                         <span>日期 Date</span>
-                        <input type="date" name="teacher_sig_date" class="signature-input">
+                        <input type="date" name="teacher_sig_date" id="teacherSigDate" class="signature-input">
                     </div>
                 </div>
             </div>
@@ -681,6 +694,12 @@ var advancedDeadValues = {
     "Advance B2 晉升": { "1.0": 33940, "0.9": 30546, "0.85": 28849, "0.8": 27152, time: "每週二、四晚上7:00-9:00p.m.", t: 31160, m: 500, ms: 2280 },
     "Advance C1 新進": { "1.0": 17140, "0.9": 15426, "0.85": 14569, "0.8": 13712, time: "每週星期一晚上 7:00-9:00p.m.", t: 14450, m: 1840, ms: 850 },
     "Advance C1 晉升": { "1.0": 15800, "0.9": 14220, "0.85": 13430, "0.8": 12640, time: "每週星期一晚上 7:00-9:00p.m.", t: 14450, m: 500, ms: 850 }
+};
+
+window.onload = function() {
+    var today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('parentSigDate')) document.getElementById('parentSigDate').value = today;
+    if (document.getElementById('teacherSigDate')) document.getElementById('teacherSigDate').value = today;
 };
 
 function changeToEightDiscount() {
@@ -729,7 +748,9 @@ function calculateTuition() {
         document.getElementById('sub_misc').value = 0;
         document.getElementById('summer_weeks_selected').value = weeks + "週";
         document.getElementById('summer_pm_selected').value = hasPM ? "加購下午班" : "無加購";
-        totalInput.value = finalTotal;
+        
+        // 🎯 統一帶入金額 "$" 符號
+        totalInput.value = "$" + finalTotal;
 
         timeDisplay.innerText = "每週二、三、四 早上 9:00-12:00a.m.";
         var bonusText = hasPM ? " (含下午英文複習班：每週$" + pmRate + " × " + weeks + "週)" : "";
@@ -752,7 +773,9 @@ function calculateTuition() {
         document.getElementById('sub_tuition').value = adv.t;
         document.getElementById('sub_materials').value = adv.m;
         document.getElementById('sub_misc').value = adv.ms;
-        totalInput.value = finalTotal;
+        
+        // 🎯 統一帶入金額 "$" 符號
+        totalInput.value = "$" + finalTotal;
 
         timeDisplay.innerText = adv.time;
         calcPreview.innerHTML = "📚 <b>" + courseKey + " 官方經辦計費確認</b>：<br>" +
@@ -774,7 +797,9 @@ function calculateTuition() {
         document.getElementById('sub_tuition').value = tuitionTotal;
         document.getElementById('sub_materials').value = materialsTotal;
         document.getElementById('sub_misc').value = miscTotal;
-        totalInput.value = finalTotal;
+        
+        // 🎯 統一帶入金額 "$" 符號
+        totalInput.value = "$" + finalTotal;
 
         timeDisplay.innerText = course.time;
         var discountLabel = " (常態原價)";
@@ -836,15 +861,18 @@ document.getElementById('enrollmentForm').addEventListener('submit', function(e)
     
     var googleAppsScriptUrl = "https://script.google.com/macros/s/AKfycbxt07hF-qkXePULEBjuCpzdWnaeNWsTlQV7dRhch_iBwtVePOIJzldTAsR0LothoQ1l/exec";
     
+    // 🎯 核心補強：加入 mode: 'no-cors' 防範瀏覽器 Cross-Origin 安全性阻斷
     fetch(googleAppsScriptUrl, {
         method: 'POST',
+        mode: 'no-cors',
         body: new URLSearchParams(new FormData(form))
     })
     .then(function() {
         alert("🎉 巴比美語：櫃檯行政總部．最終絕美落成版同步成功！");
         form.submit(); 
     })
-    .catch(function() {
+    .catch(function(error) {
+        console.warn("GAS Sync notice:", error);
         form.submit();
     });
 });
